@@ -3,7 +3,16 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - HUD
+  - Pause
+  - Weed
+  - Wood
+  - Stone
+  - Mushroom
+  - EnemyMale
+  - Campfire
+  - Canvas
   layers:
   - Default
   - TransparentFX
