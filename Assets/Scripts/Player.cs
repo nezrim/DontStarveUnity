@@ -302,11 +302,6 @@ public class Player : MonoBehaviour
             Destroy(collision.gameObject);
         }
 
-        if (collision.CompareTag("Stone"))
-        {
-            plusStone(1);
-            Destroy(collision.gameObject);
-        }
 
         if (collision.CompareTag("Campfire"))
         {
