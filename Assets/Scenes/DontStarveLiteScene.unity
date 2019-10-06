@@ -581,7 +581,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   smoothY: 0.5
   smoothX: 0.5
-  player: {fileID: 0}
+  player: {fileID: 1686111789}
 --- !u!114 &519420030
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -833,6 +833,7 @@ MonoBehaviour:
   daysCount: 0
   timeText: {fileID: 1282330773}
   dayText: {fileID: 118492739}
+  cam: {fileID: 0}
 --- !u!4 &654866289
 Transform:
   m_ObjectHideFlags: 0
@@ -840,8 +841,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 654866287}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.699884, y: -0.020751607, z: -4.597534}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -5.6998835, y: -0.020751724, z: -4.597534}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -912,7 +913,7 @@ MonoBehaviour:
   weedText: {fileID: 1910360854}
   woodText: {fileID: 759145937}
   stoneText: {fileID: 1857500241}
-  saveSpotText: {fileID: 1282330773}
+  saveSpotText: {fileID: 1227255455}
   player: {fileID: 1686111796}
   fullText: 1
 --- !u!1 &759145935
