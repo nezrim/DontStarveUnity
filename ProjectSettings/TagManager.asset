@@ -13,6 +13,13 @@ TagManager:
   - EnemyMale
   - Campfire
   - Canvas
+  - Laser
+  - Bullet
+  - ShootPoint
+  - GameControl
+  - TimeControl
+  - BGDay
+  - BGNight
   layers:
   - Default
   - TransparentFX

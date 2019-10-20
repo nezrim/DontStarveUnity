@@ -16,6 +16,7 @@ public class HUDController : MonoBehaviour
     public Text saveSpotText;
 
     public Player player;
+    public TimeControl time;
 
     public bool fullText = true;
 
@@ -23,11 +24,21 @@ public class HUDController : MonoBehaviour
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+        time = GameObject.FindGameObjectWithTag("TimeControl").GetComponent<TimeControl>();
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
+        if (time.isNight)
+        {
+            whiteText();
+        }
+        else
+        {
+            blackText();
+        }
+
         if (fullText)
         {
             //Leírás
@@ -68,5 +79,29 @@ public class HUDController : MonoBehaviour
                 saveSpotText.text = ("");
             }
         }
+    }
+
+    void whiteText()
+    {
+        healthText.color = Color.white;
+        sanityText.color = Color.white;
+        fedText.color = Color.white;
+        mushroomText.color = Color.white;
+        weedText.color = Color.white;
+        woodText.color = Color.white;
+        stoneText.color = Color.white;
+        saveSpotText.color = Color.white;
+    }
+
+    void blackText()
+    {
+        healthText.color = Color.black;
+        sanityText.color = Color.black;
+        fedText.color = Color.black;
+        mushroomText.color = Color.black;
+        weedText.color = Color.black;
+        woodText.color = Color.black;
+        stoneText.color = Color.black;
+        saveSpotText.color = Color.black;
     }
 }

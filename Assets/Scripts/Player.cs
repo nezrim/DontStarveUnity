@@ -10,6 +10,11 @@ public class Player : MonoBehaviour
     private Rigidbody2D rBody;
     private Animator anim;
     public GameObject campfire;
+    public TimeControl time;
+    public GameObject bullet;
+    private new Renderer renderer;
+
+    private Color originalColor;
 
     //Mozgás
     public float maxSpeed = 3f;
@@ -40,9 +45,12 @@ public class Player : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        time = GameObject.FindGameObjectWithTag("TimeControl").GetComponent<TimeControl>();
         rBody = gameObject.GetComponent<Rigidbody2D>();
         anim = gameObject.GetComponent<Animator>();
+        renderer = gameObject.GetComponent<SpriteRenderer>();
 
+        originalColor = renderer.material.color;
         currHealth = maxHealth;
         currSanity = maxSanity;
         currFed = maxFed;
@@ -56,7 +64,27 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (time.isNight)
+        {
+            if (safeSpot)
+            {
+                minusSanity(0.01f);
+                minusFed(0.05f);
+            }
+            else
+            {
+                minusSanity(0.1f);
+                minusFed(0.1f);
+            }
+        }
+        else
+        {
+            minusFed(0.01f);
+        }
+
+
         //Animatornak értékek passzolása
+        anim.SetBool("shoot", false);
         anim.SetBool("onGround", onGround);
         anim.SetFloat("speed", Mathf.Abs(rBody.velocity.x));
 
@@ -87,6 +115,12 @@ public class Player : MonoBehaviour
             
         }
 
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            anim.SetBool("shoot", true);
+            Instantiate(bullet, GameObject.FindGameObjectWithTag("ShootPoint").GetComponent<Transform>().position, this.transform.rotation);
+        }
+
         if (Input.GetKeyDown(KeyCode.R))
         {
             Restart();
@@ -100,6 +134,15 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.D))
         {
             minusHealth(20);
+        }
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            if (mushroom > 0)
+            {
+                plusFed(10);
+                minusMushroom(1);
+            }
         }
 
         if (Input.GetKeyDown(KeyCode.C))
@@ -146,7 +189,7 @@ public class Player : MonoBehaviour
 
     void minusMushroom(int amount)
     {
-        mushroom += amount;
+        mushroom -= amount;
         if (mushroom < 0)
         {
             mushroom=0;
@@ -160,7 +203,7 @@ public class Player : MonoBehaviour
 
     void minusWood(int amount)
     {
-        wood += amount;
+        wood -= amount;
         if (wood < 0)
         {
             wood = 0;
@@ -174,7 +217,7 @@ public class Player : MonoBehaviour
 
     void minusWeed(int amount)
     {
-        weed += amount;
+        weed -= amount;
         if (weed < 0)
         {
             weed = 0;
@@ -188,7 +231,7 @@ public class Player : MonoBehaviour
 
     void minusStone(int amount)
     {
-        stone += amount;
+        stone -= amount;
         if (stone < 0)
         {
             stone = 0;
@@ -212,6 +255,15 @@ public class Player : MonoBehaviour
         if (currHealth > maxHealth)
         {
             currHealth = maxHealth;
+        }
+    }
+
+    void minusSanity(float amount)
+    {
+        currSanity -= amount;
+        if (currSanity < 1)
+        {
+            OutOfSanity();
         }
     }
 
@@ -323,6 +375,35 @@ public class Player : MonoBehaviour
         if (collision.CompareTag("Campfire"))
         {
             plusHealth(0.02f);
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "EnemyMale")
+        {
+            minusHealth(0.1f);
+            collision.gameObject.GetComponent<EnemyControl>().reachedPlayer = true;
+            renderer.material.color = Color.red;
+        }
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "EnemyMale")
+        {
+            minusHealth(0.1f);
+            collision.gameObject.GetComponent<EnemyControl>().reachedPlayer = true;
+            renderer.material.color = Color.red;
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "EnemyMale")
+        {
+            collision.gameObject.GetComponent<EnemyControl>().reachedPlayer = false;
+            renderer.material.color = originalColor;
         }
     }
 }
