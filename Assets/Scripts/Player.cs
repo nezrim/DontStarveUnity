@@ -229,6 +229,7 @@ public class Player : MonoBehaviour
         else
         {
             Destroy(GameObject.FindGameObjectWithTag("EnemyMale"));
+            Destroy(GameObject.FindGameObjectWithTag("EnemyThief"));
             if (Input.GetKeyDown(KeyCode.R))
             {
                 Restart();
@@ -426,6 +427,19 @@ public class Player : MonoBehaviour
         Debug.Log("You have survived for " + days + " days, " + Mathf.Floor(timeAmount % 1f * 24).ToString("00") + " hours, " + Mathf.Floor(((timeAmount % 1f * 24) % 1f) * 60).ToString("00") + " minutes.");
         var obj = Instantiate(deathObject, GameObject.FindGameObjectWithTag("Canvas").GetComponent<Canvas>().transform.position, GameObject.FindGameObjectWithTag("Canvas").GetComponent<Canvas>().transform.rotation);
         obj.transform.parent = GameObject.FindGameObjectWithTag("Canvas").GetComponent<Canvas>().transform;
+
+        AudioSource[] sounds;
+        sounds = FindObjectsOfType(typeof(AudioSource)) as AudioSource[];
+        foreach (AudioSource sound in sounds)
+        {
+            if(sound.CompareTag("DayMusic") || sound.CompareTag("NightMusic") || sound.CompareTag("DeathSound"))
+            {
+                //Debug.Log("Skipped: " + sound.tag);
+                continue;
+            }
+            //Debug.Log("Stopped: " + sound.tag);
+            sound.Stop();
+        }
     }
 
     private void Stats()

@@ -120,9 +120,5 @@ public class TimeControl : MonoBehaviour
                 isNight = false;
             }
         }
-        else
-        {
-
-        }
     }
 }
