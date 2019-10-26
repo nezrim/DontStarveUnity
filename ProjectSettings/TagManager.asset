@@ -20,6 +20,22 @@ TagManager:
   - TimeControl
   - BGDay
   - BGNight
+  - DeathText
+  - Death
+  - Help
+  - EnemyThief
+  - MusicCollector
+  - DayMusic
+  - NightMusic
+  - PlayerJumpSound
+  - ZombieSound
+  - ShootSound
+  - SantaSound
+  - FireSound
+  - DeathSound
+  - WalkSound
+  - PickUpSound
+  - StealSound
   layers:
   - Default
   - TransparentFX

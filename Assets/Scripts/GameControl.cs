@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,65 +7,126 @@ public class GameControl : MonoBehaviour
 {
     public Player player;
 
+    public TimeControl time;
+    public bool isNight;
+
     public GameObject EnemyMale;
+    public GameObject EnemyThief;
 
     public GameObject Weed;
+    public GameObject DayBG;
+    public GameObject NightBG;
+    public List<GameObject> dayBGs = new List<GameObject>();
+    public List<GameObject> nightBGs = new List<GameObject>();
     public GameObject Stone;
     public GameObject Wood;
     public GameObject Mushroom;
+
+    public SpriteRenderer firstBGRenderer;
+
     public float minX = -11f;
     public float maxX = 11f;
-    int counter = 0;
+
     // Start is called before the first frame update
     void Start()
     {
+        time = GameObject.FindGameObjectWithTag("TimeControl").GetComponent<TimeControl>();
+        isNight = time.isNight;
         player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
-        minX = player.transform.position.x + 2;
-        SpawnEnemy(2, minX, maxX);
-        SpawnWeed(3, minX, maxX);
-        SpawnStone(4, minX, maxX);
-        SpawnWood(2, minX, maxX);
-        SpawnMushroom(10, minX, maxX);
+        minX = player.transform.position.x;
+ 
+        Instantiate(DayBG, DayBG.transform.position, DayBG.transform.rotation);
+        Instantiate(NightBG, NightBG.transform.position, NightBG.transform.rotation);
+
+        dayBGs.AddRange(GameObject.FindGameObjectsWithTag("BGDay"));
+        nightBGs.AddRange(GameObject.FindGameObjectsWithTag("BGNight"));
+
+        SpawnEnemy(1, minX, maxX);
+        SpawnThief(1, minX, maxX);
+        SpawnWeed(1, minX, maxX);
+        SpawnStone(1, minX, maxX);
+        SpawnWood(1, minX, maxX);
+        SpawnMushroom(1, minX, maxX);
+
+        CheckBGType();
     }
+
+    void CheckBGType()
+    {
+
+        //Debug.Log("isNight: " + time.isNight);
+        //Debug.Log("dayBGs: " + dayBGs.Count);
+        //Debug.Log("nightBGs: " + nightBGs.Count);
+
+        if (!time.isNight)
+
+        {
+            foreach (var item in dayBGs)
+            {
+                item.SetActive(true);
+            }
+            foreach (var item in nightBGs)
+            {
+                item.SetActive(false);
+            }
+        }
+        else
+        {
+            foreach (var item in dayBGs)
+            {
+                item.SetActive(false);
+            }
+            foreach (var item in nightBGs)
+            {
+                item.SetActive(true);
+            }
+        }
+    }
+
 
     // Update is called once per frame
     void Update()
     {
-        minX = player.transform.position.x + 2;
-
-        counter += 1;
-        if (counter % 500 == 0)
-        {
-            SpawnEnemy(1, minX, maxX);
-        }
-        /*
-        if (counter % 100 == 0)
-        {
-            SpawnWeed(1, minX, maxX);
-        }
-        if (counter % 100 == 0)
-        {
-            SpawnStone(1, minX, maxX);
-        }
-        if (counter % 100 == 0)
-        {
-            SpawnWood(1, minX, maxX);
-        }
-        if (counter % 100 == 0)
-        {
-            SpawnMushroom(1, minX, maxX);
-        }
-        if (counter > 1000)
-        {
-            counter = 0;
-        }*/
+        CheckBGType();
     }
 
-    void SpawnEnemy(int amount, float min, float max)
+    public void SpawnThief(int amount, float min, float max)
     {
         for (int i = 0; i < amount; i++)
         {
-            Instantiate(EnemyMale, new Vector3(Random.Range(min, max), -4.21f, 0), this.transform.rotation);
+            float random = UnityEngine.Random.Range(min, max);
+            if (Mathf.Abs(player.transform.position.x - random) > 2)
+            {
+                Instantiate(EnemyThief, new Vector3(random, -4.21f, 0), this.transform.rotation);
+            }
+            else
+            {
+                SpawnThief(amount, min, max);
+            }
+        }
+    }
+
+    void SpawnDefaultThief(int amount)
+    {
+        for (int i = 0; i < amount; i++)
+        {
+            Instantiate(EnemyThief, new Vector3(5.18f, -4.21f, 0), this.transform.rotation);
+        }
+    }
+
+    public void SpawnEnemy(int amount, float min, float max)
+    {
+        for (int i = 0; i < amount; i++)
+        {
+            float random = UnityEngine.Random.Range(min, max);
+            if (Mathf.Abs(player.transform.position.x - random) > 2)
+            {
+                Instantiate(EnemyMale, new Vector3(random, -4.21f, 0), this.transform.rotation);
+            }
+            else
+            {
+                SpawnEnemy(amount, min, max);
+            }
         }
     }
 
@@ -76,11 +138,16 @@ public class GameControl : MonoBehaviour
         }
     }
 
-    void SpawnWeed(int amount, float min, float max)
+    public void SpawnWeed(int amount, float min, float max)
     {
-        for (int i = 0; i < amount; i++)
+        float random = UnityEngine.Random.Range(min, max);
+        if (Mathf.Abs(player.transform.position.x - random) > 2)
         {
-            Instantiate(Weed, new Vector3(Random.Range(min, max), -4.75f, 0), this.transform.rotation);
+            Instantiate(Weed, new Vector3(random, -4.75f, 0), this.transform.rotation);
+        }
+        else
+        {
+            SpawnWeed(amount, min, max);
         }
     }
 
@@ -92,11 +159,16 @@ public class GameControl : MonoBehaviour
         }
     }
 
-    void SpawnStone(int amount, float min, float max)
+    public void SpawnStone(int amount, float min, float max)
     {
-        for (int i = 0; i < amount; i++)
+        float random = UnityEngine.Random.Range(min, max);
+        if (Mathf.Abs(player.transform.position.x - random) > 2)
         {
-            Instantiate(Stone, new Vector3(Random.Range(min, max), -4.75f, 0), this.transform.rotation);
+            Instantiate(Stone, new Vector3(random, -4.75f, 0), this.transform.rotation);
+        }
+        else
+        {
+            SpawnStone(amount, min, max);
         }
     }
 
@@ -108,11 +180,16 @@ public class GameControl : MonoBehaviour
         }
     }
 
-    void SpawnWood(int amount, float min, float max)
+    public void SpawnWood(int amount, float min, float max)
     {
-        for (int i = 0; i < amount; i++)
+        float random = UnityEngine.Random.Range(min, max);
+        if (Mathf.Abs(player.transform.position.x - random) > 2)
         {
-            Instantiate(Wood, new Vector3(Random.Range(min, max), -4.75f, 0), this.transform.rotation);
+            Instantiate(Wood, new Vector3(random, -4.75f, 0), this.transform.rotation);
+        }
+        else
+        {
+            SpawnWood(amount, min, max);
         }
     }
 
@@ -124,11 +201,16 @@ public class GameControl : MonoBehaviour
         }
     }
 
-    void SpawnMushroom(int amount, float min, float max)
+    public void SpawnMushroom(int amount, float min, float max)
     {
-        for (int i = 0; i < amount; i++)
+        float random = UnityEngine.Random.Range(min, max);
+        if (Mathf.Abs(player.transform.position.x - random) > 2)
         {
-            Instantiate(Mushroom, new Vector3(Random.Range(min, max), -4.8f, 0), this.transform.rotation);
+            Instantiate(Mushroom, new Vector3(random, -4.8f, 0), this.transform.rotation);
+        }
+        else
+        {
+            SpawnMushroom(amount, min, max);
         }
     }
 

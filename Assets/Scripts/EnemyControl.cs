@@ -11,20 +11,26 @@ public class EnemyControl : MonoBehaviour
     private Color originalColor;
 
     private Vector2 velocity;
-    public Transform player;
-    public float maxSpeed = 50f;
-    public float speed = 50f;
+    public Transform playerTransform;
+    public Player player;
+    public float maxSpeed = 0.01f;
+    public float speed = 5f;
 
     public float reactionSpeed = 0.1f;
 
-    public float life = 3f;
+    public float life = 10f;
 
     public bool reachedPlayer;
+
+    public AudioSource zombieSound;
 
     // Start is called before the first frame update
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
+        playerTransform = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
+        player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+        zombieSound = GameObject.FindGameObjectWithTag("ZombieSound").GetComponent<AudioSource>();
+
         rBody = gameObject.GetComponent<Rigidbody2D>();
         anim = gameObject.GetComponent<Animator>();
         renderer = gameObject.GetComponent<SpriteRenderer>();
@@ -54,14 +60,17 @@ public class EnemyControl : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        //float posX = Mathf.SmoothDamp(transform.position.x, player.transform.position.x, ref velocity.x, reactionSpeed);
-        //transform.position = Vector2.MoveTowards(transform.position, new Vector2(posX, transform.position.y), 0.01f);
-
-        if(Mathf.Abs(transform.position.x - player.transform.position.x) < 8 && this.reachedPlayer==false)
+        float dist = Mathf.Abs(transform.position.x - playerTransform.transform.position.x);
+        //Debug.Log("Dist:" + dist);
+        //Debug.Log("Reached: " + this.reachedPlayer);
+        if (dist < 8 && this.reachedPlayer == false)
         {
-            rBody.AddForce((Vector2.right * 50f) * getDirection());
+            if (!zombieSound.isPlaying)
+            {
+                zombieSound.Play();
+            }
+            rBody.AddForce((Vector2.right * 75f) * getDirection());
         }
-        
 
         if (rBody.velocity.x > maxSpeed)
         {
@@ -84,7 +93,7 @@ public class EnemyControl : MonoBehaviour
     int getDirection()
     {
         //Debug.Log(transform.position.x - player.transform.position.x);
-        if (transform.position.x - player.transform.position.x > 0)
+        if (transform.position.x - playerTransform.transform.position.x > 0)
         {
             return -1;
         }
@@ -123,6 +132,9 @@ public class EnemyControl : MonoBehaviour
         life -= 1;
         if (life < 1)
         {
+            if (zombieSound.isPlaying) {
+                zombieSound.Stop();
+            }
             this.gameObject.SetActive(false);
         }
     }

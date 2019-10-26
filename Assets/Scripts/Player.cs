@@ -13,6 +13,9 @@ public class Player : MonoBehaviour
     public TimeControl time;
     public GameObject bullet;
     private new Renderer renderer;
+    public GameObject deathObject;
+    public HelpScript hs;
+    public Pause pause;
 
     private Color originalColor;
 
@@ -39,13 +42,36 @@ public class Player : MonoBehaviour
     public int weed;
     public int wood;
     public int stone;
+    public bool isDead = false;
 
     public bool safeSpot = false;
+
+    public AudioSource walkSound;
+    public AudioSource jumpSound;
+    public AudioSource shootSound;
+    public AudioSource deathSound;
+    public AudioSource safeSpotSound;
+    public AudioSource pickUpSound;
+    public AudioSource stealSound;
+
 
     // Start is called before the first frame update
     void Start()
     {
+        pause = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Pause>();
+
+        hs = GameObject.FindGameObjectWithTag("Help").GetComponent<HelpScript>();
         time = GameObject.FindGameObjectWithTag("TimeControl").GetComponent<TimeControl>();
+
+        walkSound = GameObject.FindGameObjectWithTag("WalkSound").GetComponent<AudioSource>();
+        jumpSound = GameObject.FindGameObjectWithTag("PlayerJumpSound").GetComponent<AudioSource>();
+        shootSound = GameObject.FindGameObjectWithTag("ShootSound").GetComponent<AudioSource>();
+        deathSound = GameObject.FindGameObjectWithTag("DeathSound").GetComponent<AudioSource>();
+        safeSpotSound = GameObject.FindGameObjectWithTag("FireSound").GetComponent<AudioSource>();
+        pickUpSound = GameObject.FindGameObjectWithTag("PickUpSound").GetComponent<AudioSource>();
+        stealSound = GameObject.FindGameObjectWithTag("StealSound").GetComponent<AudioSource>();
+
+
         rBody = gameObject.GetComponent<Rigidbody2D>();
         anim = gameObject.GetComponent<Animator>();
         renderer = gameObject.GetComponent<SpriteRenderer>();
@@ -55,112 +81,181 @@ public class Player : MonoBehaviour
         currSanity = maxSanity;
         currFed = maxFed;
         mushroom = 1;
-        weed = 2;
-        wood = 3;
-        stone = 4;
+        weed = 1;
+        wood = 1;
+        stone = 1;
 
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (time.isNight)
+        if (!pause.paused && !isDead)
         {
-            if (safeSpot)
+            if (time.isNight)
             {
-                minusSanity(0.01f);
-                minusFed(0.05f);
+                if (safeSpot)
+                {
+                    plusSanity(0.05f);
+                    minusFed(0.05f);
+                }
+                else
+                {
+                    minusSanity(0.1f);
+                    minusFed(0.1f);
+                }
             }
             else
             {
-                minusSanity(0.1f);
-                minusFed(0.1f);
+                minusFed(0.01f);
+            }
+
+
+            //Animatornak értékek passzolása
+            anim.SetBool("shoot", false);
+            anim.SetBool("onGround", onGround);
+            anim.SetFloat("speed", Mathf.Abs(rBody.velocity.x));
+
+            if (rBody.velocity.x > 0.1f)
+            {
+                if (!walkSound.isPlaying)
+                {
+                    walkSound.Play();
+                }
+            }
+            else
+            {
+                if (walkSound.isPlaying)
+                {
+                    walkSound.Pause();
+                }       
+            }
+
+            //Átfordulás
+            if (Input.GetAxis("Horizontal") < -0.1f)
+            {
+                transform.localScale = new Vector3(-1, 1, 1);
+            }
+
+            if (Input.GetAxis("Horizontal") > 0.1f)
+            {
+                transform.localScale = new Vector3(1, 1, 1);
+            }
+
+
+            //Ugrás
+            if (Input.GetButtonDown("Jump"))
+            {
+                if (onGround)
+                {
+                    jumpSound.Play();
+                    doubleJump = true;
+                    rBody.AddForce(Vector2.up * jumpForce * 150);
+                }
+                else if (doubleJump)
+                {
+                    jumpSound.Play();
+                    doubleJump = false;
+                    rBody.AddForce(Vector2.up * jumpForce * 100);
+                }
+
+            }
+
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                shootSound.Play();
+                anim.SetBool("shoot", true);
+                Instantiate(bullet, GameObject.FindGameObjectWithTag("ShootPoint").GetComponent<Transform>().position, this.transform.rotation);
+            }
+
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                Restart();
+            }
+
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                Stats();
+            }
+
+            if (Input.GetKeyDown(KeyCode.D))
+            {
+                minusHealth(10);
+            }
+
+            if (Input.GetKeyDown(KeyCode.X))
+            {
+                plusHealth(10);
+            }
+
+            if (Input.GetKeyDown(KeyCode.H))
+            {
+                hs.switchText();
+            }
+
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                if (mushroom > 0)
+                {
+                    if (currFed <= 80)
+                    {
+                        plusFed(20);
+                        minusMushroom(1);
+                    }
+                    else
+                    {
+                        Debug.Log("Dont waste your mushromm, u moron");
+                    }
+                }
+            }
+
+            if (Input.GetKeyDown(KeyCode.C) && onGround)
+            {
+                if (weed>0 && wood > 0 && stone > 0)
+                {
+                    weed -= 1;
+                    wood -= 1;
+                    stone -= 1;
+                    Destroy(GameObject.FindGameObjectWithTag("Campfire"));
+                    Instantiate(campfire, new Vector3(this.transform.position.x, this.transform.position.y - 0.25f, this.transform.position.z), this.transform.rotation);
+
+                }
+                else
+                {
+                    Debug.Log("Not enough resource for campfire");
+                }
             }
         }
         else
         {
-            minusFed(0.01f);
-        }
-
-
-        //Animatornak értékek passzolása
-        anim.SetBool("shoot", false);
-        anim.SetBool("onGround", onGround);
-        anim.SetFloat("speed", Mathf.Abs(rBody.velocity.x));
-
-        //Átfordulás
-        if(Input.GetAxis("Horizontal") < -0.1f)
-        {
-            transform.localScale = new Vector3(-1, 1, 1);
-        }
-
-        if (Input.GetAxis("Horizontal") > 0.1f)
-        {
-            transform.localScale = new Vector3(1, 1, 1);
-        }
-
-
-        //Ugrás
-        if (Input.GetButtonDown("Jump"))
-        {
-            if (onGround)
+            Destroy(GameObject.FindGameObjectWithTag("EnemyMale"));
+            if (Input.GetKeyDown(KeyCode.R))
             {
-                doubleJump = true;
-                rBody.AddForce(Vector2.up * jumpForce * 150);
+                Restart();
             }
-            else if (doubleJump){
-                doubleJump = false;
-                rBody.AddForce(Vector2.up * jumpForce * 100);
-            }
-            
-        }
 
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            anim.SetBool("shoot", true);
-            Instantiate(bullet, GameObject.FindGameObjectWithTag("ShootPoint").GetComponent<Transform>().position, this.transform.rotation);
-        }
-
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            Restart();
-        }
-
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            Stats();
-        }
-
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            minusHealth(20);
-        }
-
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            if (mushroom > 0)
+            if (Input.GetKeyDown(KeyCode.E))
             {
-                plusFed(10);
-                minusMushroom(1);
+                Application.Quit();
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            Destroy(GameObject.FindGameObjectWithTag("Campfire"));
-            Instantiate(campfire, new Vector3(this.transform.position.x, this.transform.position.y - 0.25f, this.transform.position.z), this.transform.rotation);
-        }
+        
     }
 
     void FixedUpdate()
     {
-        //Bal-Jobb nyíl
-        float horizontalMove = Input.GetAxis("Horizontal");
+        if (!isDead)
+        {
+            //Bal-Jobb nyíl
+            float horizontalMove = Input.GetAxis("Horizontal");
 
-        rBody.AddForce((Vector2.right * speed )* horizontalMove);
+            rBody.AddForce((Vector2.right * speed) * horizontalMove);
+        }
 
         //Sebesség Limitek
-        if (rBody.velocity.x> maxSpeed) {
+        if (rBody.velocity.x > maxSpeed)
+        {
             rBody.velocity = new Vector2(maxSpeed, rBody.velocity.y);
         }
 
@@ -175,7 +270,8 @@ public class Player : MonoBehaviour
         slowVelocity.z = 0f;
         slowVelocity.x *= 0.95f;
 
-        if (onGround){
+        if (onGround)
+        {
             rBody.velocity = slowVelocity;
         }
     }
@@ -298,25 +394,38 @@ public class Player : MonoBehaviour
     void OutOfHealth()
     {
         Debug.Log("Out of Health");
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        Die();
     }
 
     void OutOfSanity()
     {
         Debug.Log("Out of Sanity");
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        Die();
     }
 
     void OutOfFed()
     {
         Debug.Log("Out of Fed");
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        Die();
     }
 
     void Restart()
     {
         Debug.Log("Restarted");
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    void Die()
+    {
+        deathSound.Play();
+        isDead = true;
+        anim.Play("PlayerDead", -1, 0.0f);
+        Debug.Log("You Died");
+        float timeAmount = time.elapsedTime % 1;
+        float days = time.daysCount - 1;
+        Debug.Log("You have survived for " + days + " days, " + Mathf.Floor(timeAmount % 1f * 24).ToString("00") + " hours, " + Mathf.Floor(((timeAmount % 1f * 24) % 1f) * 60).ToString("00") + " minutes.");
+        var obj = Instantiate(deathObject, GameObject.FindGameObjectWithTag("Canvas").GetComponent<Canvas>().transform.position, GameObject.FindGameObjectWithTag("Canvas").GetComponent<Canvas>().transform.rotation);
+        obj.transform.parent = GameObject.FindGameObjectWithTag("Canvas").GetComponent<Canvas>().transform;
     }
 
     private void Stats()
@@ -332,24 +441,28 @@ public class Player : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Mushroom")){
+            pickUpSound.Play();
             plusMushroom(1);
             Destroy(collision.gameObject);
         }
 
         if (collision.CompareTag("Wood"))
         {
+            pickUpSound.Play();
             plusWood(1);
             Destroy(collision.gameObject);
         }
 
         if (collision.CompareTag("Weed"))
         {
+            pickUpSound.Play();
             plusWeed(1);
             Destroy(collision.gameObject);
         }
 
         if (collision.CompareTag("Stone"))
         {
+            pickUpSound.Play();
             plusStone(1);
             Destroy(collision.gameObject);
         }
@@ -358,7 +471,11 @@ public class Player : MonoBehaviour
         if (collision.CompareTag("Campfire"))
         {
             safeSpot = true;
-            plusHealth(1);
+            if (!safeSpotSound.isPlaying)
+            {
+                safeSpotSound.Play();
+            }
+            plusHealth(0.2f);
         }
     }
 
@@ -366,6 +483,7 @@ public class Player : MonoBehaviour
     {
         if (collision.CompareTag("Campfire"))
         {
+            safeSpotSound.Pause();
             safeSpot = false;
         }
     }
@@ -374,7 +492,7 @@ public class Player : MonoBehaviour
     {
         if (collision.CompareTag("Campfire"))
         {
-            plusHealth(0.02f);
+            plusHealth(0.2f);
         }
     }
 
@@ -382,9 +500,15 @@ public class Player : MonoBehaviour
     {
         if (collision.gameObject.tag == "EnemyMale")
         {
-            minusHealth(0.1f);
+            minusHealth(0.5f);
             collision.gameObject.GetComponent<EnemyControl>().reachedPlayer = true;
             renderer.material.color = Color.red;
+        }
+
+        if (collision.gameObject.tag == "EnemyThief")
+        {
+            santaStealedMyStuffs();
+            collision.gameObject.SetActive(false);
         }
     }
 
@@ -392,9 +516,8 @@ public class Player : MonoBehaviour
     {
         if (collision.gameObject.tag == "EnemyMale")
         {
-            minusHealth(0.1f);
-            collision.gameObject.GetComponent<EnemyControl>().reachedPlayer = true;
-            renderer.material.color = Color.red;
+            minusHealth(0.5f);
+            collision.gameObject.GetComponent<EnemyControl>().reachedPlayer = true;  
         }
     }
 
@@ -406,4 +529,13 @@ public class Player : MonoBehaviour
             renderer.material.color = originalColor;
         }
     }
+
+    private void santaStealedMyStuffs()
+    {
+        stealSound.Play();
+        mushroom = 0;
+        weed = 0;
+        wood = 0;
+        stone = 0;
+}
 }

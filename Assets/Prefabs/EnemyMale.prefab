@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2208444580236578670}
   - component: {fileID: 2208444580236578671}
   - component: {fileID: 2208444580236578667}
-  - component: {fileID: 2208444580236578666}
+  - component: {fileID: 1264869618108844761}
   m_Layer: 0
   m_Name: EnemyMale
   m_TagString: EnemyMale
@@ -104,7 +104,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 4
+  m_Constraints: 6
 --- !u!61 &2208444580236578671
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -150,7 +150,7 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!114 &2208444580236578666
+--- !u!114 &1264869618108844761
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -162,9 +162,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fe670468b766784fad6951f4f88c77d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerTransform: {fileID: 0}
   player: {fileID: 0}
   maxSpeed: 0.01
   speed: 5
   reactionSpeed: 0.1
-  life: 3
+  life: 10
   reachedPlayer: 0
+  zombieSound: {fileID: 0}

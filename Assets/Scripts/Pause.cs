@@ -8,7 +8,13 @@ public class Pause : MonoBehaviour
     public GameObject PauseUI;
 
     public bool paused = false;
+    private AudioSource[] sounds;
 
+
+    void Awake()
+    {
+        sounds = FindObjectsOfType(typeof(AudioSource)) as AudioSource[];
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -25,6 +31,10 @@ public class Pause : MonoBehaviour
 
         if (paused)
         {
+            foreach (AudioSource sound in sounds)
+            {
+                sound.Pause();
+            }
             PauseUI.SetActive(true);
             Time.timeScale = 0;
         }

@@ -14,6 +14,7 @@ public class HUDController : MonoBehaviour
     public Text woodText;
     public Text stoneText;
     public Text saveSpotText;
+    public Text helpText;
 
     public Player player;
     public TimeControl time;
@@ -37,6 +38,21 @@ public class HUDController : MonoBehaviour
         else
         {
             blackText();
+        }
+
+        if (player.currHealth < 20)
+        {
+            healthText.color = Color.red;
+        }
+
+        if (player.currSanity < 20)
+        {
+            sanityText.color = Color.red;
+        }
+
+        if (player.currFed < 20)
+        {
+            fedText.color = Color.red;
         }
 
         if (fullText)
@@ -91,6 +107,7 @@ public class HUDController : MonoBehaviour
         woodText.color = Color.white;
         stoneText.color = Color.white;
         saveSpotText.color = Color.white;
+        helpText.color = Color.white;
     }
 
     void blackText()
@@ -103,5 +120,6 @@ public class HUDController : MonoBehaviour
         woodText.color = Color.black;
         stoneText.color = Color.black;
         saveSpotText.color = Color.black;
+        helpText.color = Color.black;
     }
 }
